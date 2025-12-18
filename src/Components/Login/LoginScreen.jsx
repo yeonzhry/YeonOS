@@ -1,7 +1,7 @@
 // src/components/Login/LoginScreen.js
 import React from 'react';
 import styled from 'styled-components';
-import profile from '../../assets/profile.png';
+import profile from '../../assets/Profile.png';
 
 const Container = styled.div`
   display: flex;
