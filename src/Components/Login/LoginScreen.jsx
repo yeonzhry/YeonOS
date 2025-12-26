@@ -1,4 +1,3 @@
-// src/components/Login/LoginScreen.js
 import React, { useState } from 'react';
 import styled, { keyframes } from 'styled-components';
 import profile from '../../assets/Profile.png';
@@ -9,13 +8,16 @@ const fillBar = keyframes`
   100% { width: 100%; }
 `;
 
-// --- 기존 스타일 (변경 없음) ---
 const Container = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%; /* 부모 컨테이너 높이에 따름 (보통 100vh) */
+  
+  /* [수정] 모바일 브라우저 주소창 대응을 위해 dvh 사용 */
+  height: 100vh;
+  height: 100dvh;
+  
   width: 100%;
   backdrop-filter: blur(10px);
   background-color: rgba(0, 0, 0, 0.2);
@@ -55,17 +57,14 @@ const StartButton = styled.button`
   }
 `;
 
-// --- 새로 추가된 로딩 바 스타일 ---
-// 버튼 위치에 대신 나타날 트랙
 const LoadingTrack = styled.div`
-  width: 140px; /* 버튼과 비슷한 너비 */
+  width: 140px; 
   height: 6px;
-  background-color: rgba(255, 255, 255, 0.3); /* 버튼과 같은 반투명 배경 */
+  background-color: rgba(255, 255, 255, 0.3); 
   border-radius: 3px;
   overflow: hidden;
-  margin-top: 10px; /* 버튼과의 위치 보정 */
+  margin-top: 10px; 
 `;
-
 
 const LoadingFill = styled.div`
   height: 100%;
@@ -90,7 +89,6 @@ const LoginScreen = ({ onStart }) => {
       <ProfileImage />
       <Name>Yeonjae</Name>
       
-
       {!isLoggingIn ? (
         <StartButton onClick={handleLogin}>Login</StartButton>
       ) : (

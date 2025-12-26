@@ -13,7 +13,6 @@ import GuestBookWindow from './GuestBook';
 import GarageBandWindow from './GarageBand';
 import MenuBar from './MenuBar';   
 
-
 import folderIconImg from '../../assets/icons/Folders.png';
 import memoIconImg from '../../assets/icons/Memo.png';
 import githubIconImg from '../../assets/icons/Github.png';
@@ -28,7 +27,10 @@ import garageIconImg from '../../assets/icons/GarageBand.png';
 
 const DesktopContainer = styled.div`
   width: 100%;
-  height: 100%;
+  /* [수정] 모바일 브라우저 주소창 대응을 위해 dvh 사용 */
+  height: 100vh; 
+  height: 100dvh; 
+  
   padding: 20px;
   position: relative;
   overflow: hidden;
@@ -36,18 +38,19 @@ const DesktopContainer = styled.div`
   background-position: center;
 `;
 
-// [수정됨] Grid 제거, PC와 동일한 absolute 구조 유지
 const ScatterContainer = styled.div`
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%;
+  /* [수정] 부모 높이에 맞추되 dvh 적용 */
+  height: 100vh;
+  height: 100dvh;
+  
   pointer-events: none;
   z-index: 0;
 `;
 
-// [수정됨] 모바일에서도 좌표(props.top, props.left) 유지 & 크기만 축소
 const ScatteredIconWrapper = styled.div`
   position: absolute;
   top: ${props => props.top}%;
@@ -71,10 +74,9 @@ const ScatteredIconWrapper = styled.div`
     z-index: 10;
   }
 
-  /* [Mobile] 위치는 그대로 두고(absolute), 전체적인 크기만 줄임 */
   @media (max-width: 768px) {
-    width: 64px; /* 터치 영역 너비 축소 */
-    padding: 8px; /* 패딩 축소 */
+    width: 64px; 
+    padding: 8px; 
   }
 `;
 
@@ -88,7 +90,6 @@ const IconImg = styled.div`
   margin-bottom: 8px;
   filter: drop-shadow(0px 4px 8px rgba(0, 0, 0, 0.3));
 
-  /* [Mobile] 아이콘 이미지 크기 대폭 축소 */
   @media (max-width: 768px) {
     width: 50px;
     height: 50px;
@@ -107,7 +108,6 @@ const IconText = styled.span`
   -webkit-box-orient: vertical;
   overflow: hidden;
   
-  /* [Mobile] 텍스트 크기 축소 */
   @media (max-width: 768px) {
     font-size: 10px;
   }
@@ -131,7 +131,6 @@ const StickyNote = styled.div`
   @media (max-width: 768px) { display: none; }
 `;
 
-// [수정됨] 모바일 Dock: 크기 작게, 가운데 정렬, 스크롤 제거
 const Dock = styled.div`
   position: absolute;
   bottom: 20px;
@@ -149,11 +148,10 @@ const Dock = styled.div`
   gap: 10px;
   z-index: 9999;
   
-  /* [Mobile] 스타일 */
   @media (max-width: 768px) {
     bottom: 15px;
-    height: 50px;         /* 높이 줄임 */
-    width: auto;          /* 내용물만큼만 */
+    height: 50px;
+    width: auto;
     padding: 5px 15px;
     gap: 8px;
     border-radius: 16px;
@@ -202,7 +200,6 @@ const DockIcon = styled.div`
     &:hover { transform: none; }
   }
 
-  /* [Mobile] 아이콘 아주 작게 */
   @media (max-width: 768px) {
     width: 36px;
     height: 36px;
@@ -258,52 +255,41 @@ const DesktopScreen = () => {
     }
   };
 
-  // 좌표는 PC/모바일 공통 사용 (CSS에서 모바일일 때 크기만 줄임)
   const icons = [
     { 
       id: 'project', label: 'Projects', icon: folderIconImg, action: () => openWindow('project'), 
-      // PC: (29, 35) -> Mobile: 상단 왼쪽 (20, 20)
       top: isMobile ? 28 : 29, left: isMobile ? 20 : 35 
     },
     { 
       id: 'garage', label: 'GarageBand', icon: garageIconImg, action: () => openWindow('garage'), 
-      // PC: (28, 56) -> Mobile: 상단 오른쪽 (20, 65)
       top: isMobile ? 25 : 28, left: isMobile ? 65 : 56 
     },
     { 
       id: 'about', label: 'AboutMe', icon: settingIconImg, action: () => openWindow('about'), 
-      // PC: (35, 46) -> Mobile: 중앙 (38, 42)
       top: isMobile ? 38 : 35, left: isMobile ? 42 : 46 
     },
     { 
       id: 'music', label: 'Music', icon: musicIconImg, action: () => openWindow('music'), 
-      // PC: (45, 31) -> Mobile: 하단 왼쪽 (55, 20)
       top: isMobile ? 45 : 45, left: isMobile ? 10 : 31 
     },
     { 
       id: 'guest', label: 'GuestBook', icon: memoIconImg, action: () => openWindow('guest'), 
-      // PC: (46, 60) -> Mobile: 하단 오른쪽 (55, 65)
       top: isMobile ? 48 : 46, left: isMobile ? 75 : 60 
     },
     { 
       id: 'terminal', label: 'Terminal', icon: terminalIconImg, action: () => openWindow('terminal'), 
-      // PC: (60, 45) -> Mobile: 맨 아래 중앙 (72, 42)
       top: isMobile ? 60 : 60, left: isMobile ? 42 : 45 
     },
   ];
 
-  const mobileCenterStyle = isMobile ? {
-    left: '50%',
-    top: '50%',
-    transform: 'translate(-50%, -50%)',
-    margin: 0
-  } : {};
+  // MobileWindowCenterStyle은 WindowFrame.js에서 CSS로 처리하므로 제거해도 무방하나, 
+  // 기존 코드 유지를 위해 남겨둔다면 빈 객체로 둡니다.
+  const mobileCenterStyle = {};
 
   return (
     <DesktopContainer>
       <MenuBar />
 
-      {/* 윈도우들: 모바일이면 크기 90%~95% */}
       {windows.terminal.isOpen && (
         <WindowFrame title="yeonjae — -zsh" 
           width={isMobile ? "85vw" : "600px"} 
@@ -352,7 +338,6 @@ const DesktopScreen = () => {
           height={isMobile ? "580px" : "580px"}
           zIndex={windows.music.zIndex} 
           isMinimized={windows.music.isMinimized}
-          // style={mobileCenterStyle}
           onClose={() => closeWindow('music')} 
           onMinimize={() => minimizeWindow('music')} onClick={() => openWindow('music')} transparent={true}
         >
