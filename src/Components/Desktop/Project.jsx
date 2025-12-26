@@ -762,10 +762,7 @@ const allProjects = [
     role: "Frontend, Database",
     github: "https://github.com/yeonzhry/art-ist",
     link: "https://artdpist.com/",
-    folder: [
-      { type: 'image', src: project1Img, caption: 'Main View' }, 
-      { type: 'image', src: project2Img, caption: 'Details' }
-    ] 
+    folder: null
   },
   { 
     id: 2, 
