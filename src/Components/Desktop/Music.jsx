@@ -13,7 +13,6 @@ import cover from '../../assets/images/Music.png';
 
 
 const SONG_INFO = {
-  // 테스트용 무료 음원 URL (본인 파일로 교체 시 import 변수 사용)
   audioUrl: audio,
   cover: cover, 
   title: "Bluebird",
@@ -136,7 +135,6 @@ const MusicWindow = () => {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
 
-  // 재생/일시정지 토글
   const togglePlay = () => {
     if (isPlaying) {
       audioRef.current.pause();
@@ -146,31 +144,26 @@ const MusicWindow = () => {
     setIsPlaying(!isPlaying);
   };
 
-  // 시간 업데이트 이벤트 (재생 중 계속 호출됨)
   const handleTimeUpdate = () => {
     setCurrentTime(audioRef.current.currentTime);
   };
 
-  // 오디오 메타데이터 로드 완료 시 (총 길이 설정)
   const handleLoadedMetadata = () => {
     setDuration(audioRef.current.duration);
   };
 
-  // 사용자가 바를 조작했을 때 (Seek)
   const handleSeek = (e) => {
     const time = Number(e.target.value);
     audioRef.current.currentTime = time;
     setCurrentTime(time);
   };
 
-  // 재생 끝났을 때
   const handleEnded = () => {
     setIsPlaying(false);
     setCurrentTime(0);
     audioRef.current.currentTime = 0;
   };
 
-  // 시간 포맷 (초 -> MM:SS)
   const formatTime = (time) => {
     if (isNaN(time)) return "0:00";
     const minutes = Math.floor(time / 60);
@@ -178,7 +171,7 @@ const MusicWindow = () => {
     return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
   };
 
-  // 진행률 계산 (%)
+
   const percent = duration ? (currentTime / duration) * 100 : 0;
 
   return (

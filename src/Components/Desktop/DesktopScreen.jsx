@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
 // =========================================================
@@ -13,15 +13,12 @@ import GuestBookWindow from './GuestBook';
 import GarageBandWindow from './GarageBand';
 import MenuBar from './MenuBar';   
 
-// =========================================================
-// 2. 이미지 Import
-// =========================================================
+
 import folderIconImg from '../../assets/icons/Folders.png';
 import memoIconImg from '../../assets/icons/Memo.png';
 import githubIconImg from '../../assets/icons/Github.png';
 import musicIconImg from '../../assets/icons/Music.png';
 import terminalIconImg from '../../assets/icons/Terminal.png';
-import safariIconImg from '../../assets/icons/Safari.png';
 import settingIconImg from '../../assets/icons/Setting.png';
 import garageIconImg from '../../assets/icons/GarageBand.png';
 
@@ -35,20 +32,22 @@ const DesktopContainer = styled.div`
   padding: 20px;
   position: relative;
   overflow: hidden;
+  background-size: cover;
+  background-position: center;
 `;
 
-// [수정] 아이콘들이 자유롭게 배치될 전체 영역
+// [수정됨] Grid 제거, PC와 동일한 absolute 구조 유지
 const ScatterContainer = styled.div`
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  pointer-events: none; /* 아이콘 없는 빈 공간은 클릭 통과 */
+  pointer-events: none;
   z-index: 0;
 `;
 
-// [수정] 좌표를 받아 배치되는 아이콘 래퍼
+// [수정됨] 모바일에서도 좌표(props.top, props.left) 유지 & 크기만 축소
 const ScatteredIconWrapper = styled.div`
   position: absolute;
   top: ${props => props.top}%;
@@ -62,7 +61,7 @@ const ScatteredIconWrapper = styled.div`
   padding: 10px;
   border-radius: 12px;
   border: 1px solid transparent;
-  pointer-events: auto; /* 아이콘은 클릭 가능 */
+  pointer-events: auto;
   transition: all 0.2s ease;
   
   &:hover {
@@ -70,6 +69,12 @@ const ScatteredIconWrapper = styled.div`
     border: 1px solid rgba(255, 255, 255, 0.3);
     transform: scale(1.05);
     z-index: 10;
+  }
+
+  /* [Mobile] 위치는 그대로 두고(absolute), 전체적인 크기만 줄임 */
+  @media (max-width: 768px) {
+    width: 64px; /* 터치 영역 너비 축소 */
+    padding: 8px; /* 패딩 축소 */
   }
 `;
 
@@ -82,6 +87,13 @@ const IconImg = styled.div`
   background-position: center;
   margin-bottom: 8px;
   filter: drop-shadow(0px 4px 8px rgba(0, 0, 0, 0.3));
+
+  /* [Mobile] 아이콘 이미지 크기 대폭 축소 */
+  @media (max-width: 768px) {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 4px;
+  }
 `;
 
 const IconText = styled.span`
@@ -94,6 +106,11 @@ const IconText = styled.span`
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  
+  /* [Mobile] 텍스트 크기 축소 */
+  @media (max-width: 768px) {
+    font-size: 10px;
+  }
 `;
 
 const StickyNote = styled.div`
@@ -105,20 +122,16 @@ const StickyNote = styled.div`
   background-color: #d1fffc;
   border: 1px solid #aee2ef;
   padding: 20px;
-  /* box-shadow: 2px 4px 10px rgba(0,0,0,0.1); */
   color: #4a4a4a;
   
-  h3 {
-    margin-bottom: 15px;
-    font-size: 18px;
-    padding-bottom: 5px;
-  }
-  p {
-    font-size: 15px;
-    line-height: 1.4;
-  }
+  h3 { margin-bottom: 15px; font-size: 18px; padding-bottom: 5px; }
+  p { font-size: 15px; line-height: 1.4; }
+
+  @media (max-width: 1024px) { right: 20px; }
+  @media (max-width: 768px) { display: none; }
 `;
 
+// [수정됨] 모바일 Dock: 크기 작게, 가운데 정렬, 스크롤 제거
 const Dock = styled.div`
   position: absolute;
   bottom: 20px;
@@ -135,6 +148,16 @@ const Dock = styled.div`
   padding: 10px 15px;
   gap: 10px;
   z-index: 9999;
+  
+  /* [Mobile] 스타일 */
+  @media (max-width: 768px) {
+    bottom: 15px;
+    height: 50px;         /* 높이 줄임 */
+    width: auto;          /* 내용물만큼만 */
+    padding: 5px 15px;
+    gap: 8px;
+    border-radius: 16px;
+  }
 `;
 
 const DockIcon = styled.div`
@@ -148,6 +171,7 @@ const DockIcon = styled.div`
   transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
   filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.2));
   position: relative;
+  flex-shrink: 0;
 
   &:hover {
     transform: scale(1.2) translateY(-15px);
@@ -177,6 +201,20 @@ const DockIcon = styled.div`
     pointer-events: none;
     &:hover { transform: none; }
   }
+
+  /* [Mobile] 아이콘 아주 작게 */
+  @media (max-width: 768px) {
+    width: 36px;
+    height: 36px;
+    
+    &:hover { transform: scale(1.1) translateY(-5px); }
+
+    &.separator { height: 30px; margin: 0 2px; }
+    
+    ${props => props.isOpen && `
+      &::after { bottom: -4px; width: 3px; height: 3px; }
+    `}
+  }
 `;
 
 
@@ -195,189 +233,183 @@ const DesktopScreen = () => {
   });
 
   const [topZIndex, setTopZIndex] = useState(10);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const openWindow = (id) => {
     setTopZIndex(prev => prev + 1);
-    setWindows(prev => ({
-      ...prev,
-      [id]: { isOpen: true, isMinimized: false, zIndex: topZIndex + 1 }
-    }));
+    setWindows(prev => ({ ...prev, [id]: { isOpen: true, isMinimized: false, zIndex: topZIndex + 1 } }));
   };
 
-  const closeWindow = (id) => {
-    setWindows(prev => ({
-      ...prev,
-      [id]: { ...prev[id], isOpen: false }
-    }));
-  };
-
-  const minimizeWindow = (id) => {
-    setWindows(prev => ({
-      ...prev,
-      [id]: { ...prev[id], isMinimized: true }
-    }));
-  };
+  const closeWindow = (id) => setWindows(prev => ({ ...prev, [id]: { ...prev[id], isOpen: false } }));
+  const minimizeWindow = (id) => setWindows(prev => ({ ...prev, [id]: { ...prev[id], isMinimized: true } }));
 
   const handleDockClick = (id) => {
     const win = windows[id];
     if (win.isOpen) {
-      if (win.isMinimized) {
-        openWindow(id); 
-      } else {
-        minimizeWindow(id);
-      }
+      if (win.isMinimized) openWindow(id); else minimizeWindow(id);
     } else {
       openWindow(id);
     }
   };
 
-  // [설정] 아이콘 위치 좌표 (top, left %)
+  // 좌표는 PC/모바일 공통 사용 (CSS에서 모바일일 때 크기만 줄임)
   const icons = [
-    { id: 'about', label: 'About Me', icon: settingIconImg, action: () => openWindow('about'), top: 35, left: 46 },
-    { id: 'project', label: 'Projects', icon: folderIconImg, action: () => openWindow('project'), top: 29, left: 35 },
-    { id: 'music', label: 'Music', icon: musicIconImg, action: () => openWindow('music'), top: 45, left: 31 },
-    { id: 'terminal', label: 'Terminal', icon: terminalIconImg, action: () => openWindow('terminal'), top: 60, left: 45 },
-    { id: 'guest', label: 'GuestBook', icon: memoIconImg, action: () => openWindow('guest'), top: 46, left: 60 },
-    { id: 'garage', label: 'GarageBand', icon: garageIconImg, action: () => openWindow('garage'), top: 28, left: 56 },
+    { 
+      id: 'project', label: 'Projects', icon: folderIconImg, action: () => openWindow('project'), 
+      // PC: (29, 35) -> Mobile: 상단 왼쪽 (20, 20)
+      top: isMobile ? 28 : 29, left: isMobile ? 20 : 35 
+    },
+    { 
+      id: 'garage', label: 'GarageBand', icon: garageIconImg, action: () => openWindow('garage'), 
+      // PC: (28, 56) -> Mobile: 상단 오른쪽 (20, 65)
+      top: isMobile ? 25 : 28, left: isMobile ? 65 : 56 
+    },
+    { 
+      id: 'about', label: 'AboutMe', icon: settingIconImg, action: () => openWindow('about'), 
+      // PC: (35, 46) -> Mobile: 중앙 (38, 42)
+      top: isMobile ? 38 : 35, left: isMobile ? 42 : 46 
+    },
+    { 
+      id: 'music', label: 'Music', icon: musicIconImg, action: () => openWindow('music'), 
+      // PC: (45, 31) -> Mobile: 하단 왼쪽 (55, 20)
+      top: isMobile ? 45 : 45, left: isMobile ? 10 : 31 
+    },
+    { 
+      id: 'guest', label: 'GuestBook', icon: memoIconImg, action: () => openWindow('guest'), 
+      // PC: (46, 60) -> Mobile: 하단 오른쪽 (55, 65)
+      top: isMobile ? 48 : 46, left: isMobile ? 75 : 60 
+    },
+    { 
+      id: 'terminal', label: 'Terminal', icon: terminalIconImg, action: () => openWindow('terminal'), 
+      // PC: (60, 45) -> Mobile: 맨 아래 중앙 (72, 42)
+      top: isMobile ? 60 : 60, left: isMobile ? 42 : 45 
+    },
   ];
+
+  const mobileCenterStyle = isMobile ? {
+    left: '50%',
+    top: '50%',
+    transform: 'translate(-50%, -50%)',
+    margin: 0
+  } : {};
 
   return (
     <DesktopContainer>
       <MenuBar />
 
-      {/* --- 윈도우 창들 --- */}
+      {/* 윈도우들: 모바일이면 크기 90%~95% */}
       {windows.terminal.isOpen && (
-        <WindowFrame
-          title="yeonjae — -zsh — 80x24"
-          width="600px" height="400px"
-          zIndex={windows.terminal.zIndex}
+        <WindowFrame title="yeonjae — -zsh" 
+          width={isMobile ? "85vw" : "600px"} 
+          height={isMobile ? "60vh" : "400px"}
+          zIndex={windows.terminal.zIndex} 
           isMinimized={windows.terminal.isMinimized}
-          onClose={() => closeWindow('terminal')}
-          onMinimize={() => minimizeWindow('terminal')}
-          onClick={() => openWindow('terminal')}
+          style={mobileCenterStyle}
+          onClose={() => closeWindow('terminal')} 
+          onMinimize={() => minimizeWindow('terminal')} onClick={() => openWindow('terminal')}
         >
           <TerminalWindow openApp={openWindow} />
         </WindowFrame>
       )}
 
       {windows.about.isOpen && (
-        <WindowFrame
-          title="Apple Account"
-          width="850px" height="600px"
-          zIndex={windows.about.zIndex}
+        <WindowFrame title="Apple Account"
+          width={isMobile ? "85vw" : "850px"} 
+          height={isMobile ? "80vh" : "600px"}
+          zIndex={windows.about.zIndex} 
           isMinimized={windows.about.isMinimized}
-          onClose={() => closeWindow('about')}
-          onMinimize={() => minimizeWindow('about')}
-          onClick={() => openWindow('about')}
-          transparent={true}
+          style={mobileCenterStyle}
+          onClose={() => closeWindow('about')} 
+          onMinimize={() => minimizeWindow('about')} onClick={() => openWindow('about')} transparent={true}
         >
           <AboutMeWindow />
         </WindowFrame>
       )}
 
       {windows.project.isOpen && (
-        <WindowFrame
-          title="Finder"
-          width="950px" height="600px"
-          zIndex={windows.project.zIndex}
+        <WindowFrame title="Finder" 
+          width={isMobile ? "85vw" : "950px"} 
+          height={isMobile ? "80vh" : "600px"}
+          zIndex={windows.project.zIndex} 
           isMinimized={windows.project.isMinimized}
-          onClose={() => closeWindow('project')}
-          onMinimize={() => minimizeWindow('project')}
-          onClick={() => openWindow('project')}
-          transparent={true}
+          style={mobileCenterStyle}
+          onClose={() => closeWindow('project')} 
+          onMinimize={() => minimizeWindow('project')} onClick={() => openWindow('project')} transparent={true}
         >
           <ProjectsWindow />
         </WindowFrame>
       )}
 
       {windows.music.isOpen && (
-        <WindowFrame
-          title="Music"
-          width="300px" height="580px"
-          zIndex={windows.music.zIndex}
+        <WindowFrame title="Music" 
+          width={isMobile ? "300px" : "300px"} 
+          height={isMobile ? "580px" : "580px"}
+          zIndex={windows.music.zIndex} 
           isMinimized={windows.music.isMinimized}
-          onClose={() => closeWindow('music')}
-          onMinimize={() => minimizeWindow('music')}
-          onClick={() => openWindow('music')}
-          transparent={true}
+          // style={mobileCenterStyle}
+          onClose={() => closeWindow('music')} 
+          onMinimize={() => minimizeWindow('music')} onClick={() => openWindow('music')} transparent={true}
         >
           <MusicWindow />
         </WindowFrame>
       )}
 
       {windows.garage.isOpen && (
-        <WindowFrame
-          title="GarageBand - Synth"
-          width="650px" height="300px"
-          zIndex={windows.garage.zIndex}
+        <WindowFrame title="GarageBand - Synth" 
+          width={isMobile ? "85vw" : "660px"} 
+          height={isMobile ? "80vh" : "320px"}
+          zIndex={windows.garage.zIndex} 
           isMinimized={windows.garage.isMinimized}
-          onClose={() => closeWindow('garage')}
-          onMinimize={() => minimizeWindow('garage')}
-          onClick={() => openWindow('garage')}
-          transparent={false}
+          style={mobileCenterStyle}
+          onClose={() => closeWindow('garage')} 
+          onMinimize={() => minimizeWindow('garage')} onClick={() => openWindow('garage')} transparent={false}
         >
           <GarageBandWindow />
         </WindowFrame>
       )}
 
       {windows.guest.isOpen && (
-        <WindowFrame
-          title="Guest Book"
-          width="800px" height="550px"
-          zIndex={windows.guest.zIndex}
+        <WindowFrame title="Guest Book"
+          width={isMobile ? "85vw" : "800px"} 
+          height={isMobile ? "80vh" : "550px"}
+          zIndex={windows.guest.zIndex} 
           isMinimized={windows.guest.isMinimized}
-          onClose={() => closeWindow('guest')}
-          onMinimize={() => minimizeWindow('guest')}
-          onClick={() => openWindow('guest')}
-          transparent={true}
+          onClose={() => closeWindow('guest')} 
+          onMinimize={() => minimizeWindow('guest')} onClick={() => openWindow('guest')} transparent={true}
         >
           <GuestBookWindow />
         </WindowFrame>
       )}
 
-      {/* --- [수정됨] 자유 배치된 바탕화면 아이콘들 --- */}
       <ScatterContainer>
         {icons.map((item) => (
-          <ScatteredIconWrapper 
-            key={item.id}
-            top={item.top} 
-            left={item.left}
-            onClick={item.action}
-          >
+          <ScatteredIconWrapper key={item.id} top={item.top} left={item.left} onClick={item.action}>
             <IconImg src={item.icon} />
             <IconText>{item.label}</IconText>
           </ScatteredIconWrapper>
         ))}
       </ScatterContainer>
 
-      {/* --- 메모장 --- */}
       <StickyNote>
-        <h3>Welcome to Yeonjae's Portfolio! <br/>
-
-        </h3>
-        <p>
-         Enjoy the journey ~
-        </p>
+        <h3>Welcome to Yeonjae's Portfolio!</h3>
+        <p>Enjoy the journey ~</p>
       </StickyNote>
 
-      {/* --- 하단 독(Dock) --- */}
       <Dock>
         <DockIcon src={folderIconImg} onClick={() => handleDockClick('project')} isOpen={windows.project.isOpen} />
         <DockIcon src={terminalIconImg} onClick={() => handleDockClick('terminal')} isOpen={windows.terminal.isOpen}  />
         <DockIcon src={musicIconImg} onClick={() => handleDockClick('music')} isOpen={windows.music.isOpen} />
-
         <DockIcon src={memoIconImg} onClick={() => handleDockClick('guest')} isOpen={windows.guest.isOpen} /> 
-          
         <DockIcon src={garageIconImg} onClick={() => handleDockClick('garage')} isOpen={windows.garage.isOpen} />
         <DockIcon src={settingIconImg} onClick={() => handleDockClick('about')} isOpen={windows.project.isOpen} />
-
         <DockIcon className="separator" />
-
-        <DockIcon 
-          src={githubIconImg} 
-          onClick={() => window.open('https://github.com/yeonzhry/YeonOS', '_blank')} 
-        />
-
+        <DockIcon src={githubIconImg} onClick={() => window.open('https://github.com/yeonzhry/YeonOS', '_blank')} />
       </Dock>
     </DesktopContainer>
   );
