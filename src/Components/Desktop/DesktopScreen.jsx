@@ -293,7 +293,7 @@ const DesktopScreen = () => {
       {windows.terminal.isOpen && (
         <WindowFrame title="yeonjae — -zsh" 
           width={isMobile ? "85vw" : "600px"} 
-          height={isMobile ? "60vh" : "400px"}
+          height={isMobile ? "60dvh" : "400px"}
           zIndex={windows.terminal.zIndex} 
           isMinimized={windows.terminal.isMinimized}
           style={mobileCenterStyle}
@@ -307,7 +307,7 @@ const DesktopScreen = () => {
       {windows.about.isOpen && (
         <WindowFrame title="Apple Account"
           width={isMobile ? "85vw" : "850px"} 
-          height={isMobile ? "80vh" : "600px"}
+          height={isMobile ? "80dvh" : "600px"}
           zIndex={windows.about.zIndex} 
           isMinimized={windows.about.isMinimized}
           style={mobileCenterStyle}
@@ -321,7 +321,7 @@ const DesktopScreen = () => {
       {windows.project.isOpen && (
         <WindowFrame title="Finder" 
           width={isMobile ? "85vw" : "950px"} 
-          height={isMobile ? "80vh" : "600px"}
+          height={isMobile ? "80dvh" : "600px"}
           zIndex={windows.project.zIndex} 
           isMinimized={windows.project.isMinimized}
           style={mobileCenterStyle}
@@ -348,7 +348,7 @@ const DesktopScreen = () => {
       {windows.garage.isOpen && (
         <WindowFrame title="GarageBand - Synth" 
           width={isMobile ? "85vw" : "660px"} 
-          height={isMobile ? "80vh" : "320px"}
+          height={isMobile ? "80dvh" : "320px"}
           zIndex={windows.garage.zIndex} 
           isMinimized={windows.garage.isMinimized}
           style={mobileCenterStyle}
@@ -362,7 +362,7 @@ const DesktopScreen = () => {
       {windows.guest.isOpen && (
         <WindowFrame title="Guest Book"
           width={isMobile ? "85vw" : "800px"} 
-          height={isMobile ? "80vh" : "550px"}
+          height={isMobile ? "80dvh" : "550px"}
           zIndex={windows.guest.zIndex} 
           isMinimized={windows.guest.isMinimized}
           onClose={() => closeWindow('guest')} 

@@ -98,6 +98,10 @@ const NavGroup = styled.div`
     cursor: pointer;
     &:hover { color: #000; }
   }
+
+  @media (max-width: 768px) {
+    opacity: 0;
+  }
 `;
 
 const ViewToggle = styled.div`
