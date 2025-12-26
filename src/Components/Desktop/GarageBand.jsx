@@ -71,10 +71,10 @@ const SynthBody = styled.div`
     
     /* 회전하면 width가 높이가 되고, height가 너비가 됨 */
     /* 윈도우 창 높이만큼 길게 만들기 위해 width를 늘림 */
-    width: 66vh; /* 창 높이의 60% 정도 길이 */
+    width: 66dvh; /* 창 높이의 60% 정도 길이 */
     
     /* 회전 후 너비(원래 height)는 창 너비에 맞춤 */
-    height: 75vw; 
+    height: 75dvw; 
     
     /* 위치 및 패딩 조정 */
     padding: 15px;
