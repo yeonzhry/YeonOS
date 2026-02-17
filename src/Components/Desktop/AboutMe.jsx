@@ -342,7 +342,7 @@ const AboutMeWindow = () => {
             </SettingItem>
             <SettingItem>
               <span className="label">E-mail</span>
-              <span className="value" style={{color:'#007aff'}}>yeonzhry@gmail.com</span>
+              <span className="value" style={{color:'#007aff'}}></span>
             </SettingItem>
           </SettingsGroup>
           
